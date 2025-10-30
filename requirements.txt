@@ -1,9 +1,29 @@
-# requirements.txt
-python-dotenv
-gunicorn
+# # requirements.txt
+# python-dotenv
+# gunicorn
+# Flask
+# Flask-Cors
+# # ... (rest of the file is the same)
+# spacy
+# sentence-transformers
+# keybert
+# PyMuPDF
+# python-docx
+# google-generativeai
+# scikit-learn
+# shap
+# matplotlib
+# numpy
+
+
+
+
+
+
 Flask
 Flask-Cors
-# ... (rest of the file is the same)
+gunicorn
+python-dotenv
 spacy
 sentence-transformers
 keybert
@@ -14,3 +34,4 @@ scikit-learn
 shap
 matplotlib
 numpy
+werkzeug
