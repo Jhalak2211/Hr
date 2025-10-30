@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Apply for {{ job.job_title }}</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        /* Style for the camera feed */
+        #camera-feed { width: 100%; max-width: 320px; border: 1px solid #ccc; margin-bottom: 10px; }
+        #snapshot-canvas { display: none; } /* Hide the canvas */
+    </style>
+</head>
+<body>
+    <div class="container mt-5 mb-5">
+        <div class="card">
+            <div class="card-header">
+                <h2>{{ job.job_title }}</h2>
+                <h6 class="card-subtitle mb-2 text-muted">{{ job.location }}</h6>
+            </div>
+            <div class="card-body">
+                <h4>Job Description</h4>
+                <p style="white-space: pre-wrap;">{{ job.job_description | safe }}</p>
+                <hr>
+                <h4>Submit Your Application</h4>
+                <div class="alert alert-info"><strong>Please Note:</strong> PDF resume preferred. Scoring based on keywords.</div>
+
+                <form id="applicationForm">
+                    <div class="form-group"><label for="applicant_name">Full Name</label><input type="text" class="form-control" id="applicant_name" required></div>
+                    <div class="form-group"><label for="applicant_email">Email Address</label><input type="email" class="form-control" id="applicant_email" required></div>
+                    <div class="form-group"><label for="applicant_contact">Contact Number</label><input type="tel" class="form-control" id="applicant_contact"></div>
+                    <div class="form-group"><label for="resume">Upload Resume (PDF, DOCX)</label><input type="file" class="form-control-file" id="resume" accept=".pdf,.docx" required></div>
+                    <div class="form-group"><label for="photo">Upload Photo (JPG, PNG)</label><input type="file" class="form-control-file" id="photo" accept=".jpg,.jpeg,.png"></div>
+
+                    <hr>
+                    <h4>Live Photo Capture</h4>
+                    <div class="form-group">
+                        <video id="camera-feed" autoplay playsinline></video>
+                        <canvas id="snapshot-canvas"></canvas>
+                        <button type="button" id="capture-btn" class="btn btn-secondary">Capture Photo</button>
+                        <p id="capture-status" class="text-success mt-2" style="display: none;">Photo captured!</p>
+                    </div>
+                    <input type="hidden" name="live_photo_data" id="live_photo_data">
+                    <hr>
+
+                    <button type="submit" class="btn btn-success">Apply Now</button>
+                </form>
+                <div id="successMessage" class="alert alert-success mt-3" style="display:none;">Application submitted!</div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    const video = document.getElementById('camera-feed');
+    const canvas = document.getElementById('snapshot-canvas');
+    const captureButton = document.getElementById('capture-btn');
+    const livePhotoDataInput = document.getElementById('live_photo_data');
+    const captureStatus = document.getElementById('capture-status');
+    let stream = null;
+
+    // 1. Request Camera Access
+    async function startCamera() {
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+            video.srcObject = stream;
+            video.play(); // Ensure video plays
+        } catch (err) {
+            console.error("Error accessing camera: ", err);
+            alert("Could not access camera. Please ensure you grant permission.");
+        }
+    }
+
+    // 2. Capture Snapshot
+    captureButton.addEventListener('click', () => {
+        if (!stream) {
+            alert("Camera not started. Please allow camera access.");
+            return;
+        }
+        // Set canvas dimensions to match video stream
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        // Draw the current video frame onto the canvas
+        const context = canvas.getContext('2d');
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Convert canvas image to Base64 data URL (JPEG format)
+        const dataUrl = canvas.toDataURL('image/jpeg');
+        livePhotoDataInput.value = dataUrl; // Store in hidden input
+        captureStatus.style.display = 'block'; // Show success message
+        console.log("Photo captured and stored.");
+    });
+
+    // 3. Handle Form Submission
+    document.getElementById('applicationForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
+
+        // Check if live photo was captured
+        if (!livePhotoDataInput.value) {
+            alert("Please capture a live photo before submitting.");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('applicant_name', document.getElementById('applicant_name').value);
+        formData.append('applicant_email', document.getElementById('applicant_email').value);
+        formData.append('applicant_contact', document.getElementById('applicant_contact').value);
+        formData.append('resume', document.getElementById('resume').files[0]);
+        formData.append('live_photo_data', livePhotoDataInput.value); // Add live photo data
+
+        const photoFile = document.getElementById('photo').files[0];
+        if (photoFile) {
+            formData.append('photo', photoFile);
+        }
+
+        try {
+            const response = await fetch(window.location.pathname, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                document.getElementById('applicationForm').style.display = 'none';
+                document.getElementById('successMessage').style.display = 'block';
+                // Stop the camera stream after successful submission
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                }
+            } else {
+                const result = await response.json();
+                alert('Error submitting application: ' + result.message);
+            }
+        } catch (error) {
+            console.error("Submission error:", error);
+            alert("An error occurred during submission.");
+        }
+    });
+
+    // Start the camera when the page loads
+    startCamera();
+</script>
+</body>
+</html>

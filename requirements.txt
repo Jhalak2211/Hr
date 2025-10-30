@@ -1,0 +1,16 @@
+# requirements.txt
+python-dotenv
+gunicorn
+Flask
+Flask-Cors
+# ... (rest of the file is the same)
+spacy
+sentence-transformers
+keybert
+PyMuPDF
+python-docx
+google-generativeai
+scikit-learn
+shap
+matplotlib
+numpy

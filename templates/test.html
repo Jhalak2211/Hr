@@ -1,0 +1,729 @@
+<!-- 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Take Your Test</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    .question-section { margin-bottom: 40px; }
+    .question { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 8px; }
+    .question p { font-weight: bold; margin-bottom: 10px; }
+    .options { display: flex; flex-direction: column; }
+    .options label { margin-bottom: 8px; cursor: pointer; }
+    .options input[type="radio"] { margin-right: 8px; }
+    textarea { width: 100%; height: 100px; padding: 10px; box-sizing: border-box; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Assessment Test</h1>
+    <p>Please complete all sections of the test.</p>
+
+    <form id="testForm" method="POST">
+      {% set current_category = "" %}
+      {% for question in questions %}
+        {% set q_index = loop.index0 %}
+        {% if question.category != current_category %}
+          {% if not loop.first %}
+            </div>
+          {% endif %}
+          <div class="question-section">
+            <h2>{{ question.category.capitalize() }} Questions</h2>
+        {% endif %}
+        {% set current_category = question.category %}
+
+        <div class="question">
+          <p>Q{{ q_index + 1 }}: {{ question.question }}</p>
+
+          {% if question.category == 'scenario' %}
+            <textarea name="q{{ q_index }}" required>{{ request.form.get('q' ~ q_index, '') }}</textarea>
+          {% else %}
+            <div class="options">
+              {% for option in question.options %}
+              <label>
+                <input type="radio"
+                       name="q{{ q_index }}"
+                       value="{{ option }}"
+                       {% if request.form.get('q' ~ q_index) == option %}checked{% endif %}
+                       required>
+                {{ option }}
+              </label>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+      {% endfor %}
+      </div>
+
+      <input type="hidden" name="email" value="{{ email }}">
+      <input type="hidden" name="test_id" value="{{ test_id }}">
+      <button type="submit">Submit Test</button>
+    </form>
+  </div>
+
+  <script>
+    const form = document.getElementById("testForm");
+    const storageKey = "candidate_answers_{{ test_id }}";
+
+    // Load saved answers
+    window.addEventListener("DOMContentLoaded", () => {
+      const saved = JSON.parse(localStorage.getItem(storageKey) || "{}");
+      for (const [name, value] of Object.entries(saved)) {
+        const radio = form.querySelector(`input[name="${name}"][value="${value}"]`);
+        if (radio) radio.checked = true;
+        const textarea = form.querySelector(`textarea[name="${name}"]`);
+        if (textarea) textarea.value = value;
+      }
+    });
+
+    // Save selections
+    form.addEventListener("change", () => {
+      const data = {};
+      const inputs = form.querySelectorAll("input[type=radio]:checked, textarea");
+      inputs.forEach(el => data[el.name] = el.value);
+      localStorage.setItem(storageKey, JSON.stringify(data));
+    });
+
+    // Save textarea typing live
+    form.addEventListener("input", () => {
+      const data = {};
+      const inputs = form.querySelectorAll("input[type=radio]:checked, textarea");
+      inputs.forEach(el => data[el.name] = el.value);
+      localStorage.setItem(storageKey, JSON.stringify(data));
+    });
+
+    // Clear saved answers on successful submit
+    form.addEventListener("submit", () => {
+      localStorage.removeItem(storageKey);
+    });
+  </script>
+</body>
+</html>  -->
+
+
+
+
+
+
+
+
+<!-- 
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Take Your Test</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 30px;
+      background: #f8f9fa;
+      color: #333;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: #fff;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #444;
+    }
+
+    h2 {
+      color: #007bff;
+    }
+
+    .question-section {
+      margin-bottom: 40px;
+    }
+
+    .question {
+      margin-bottom: 20px;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background: #fafafa;
+    }
+
+    .question p {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .options label {
+      margin-bottom: 8px;
+      cursor: pointer;
+    }
+
+    .options input[type="radio"] {
+      margin-right: 8px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 100px;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .recorder-controls button {
+      margin-right: 5px;
+    }
+
+    .audio-playback {
+      margin-top: 10px;
+      display: none;
+    }
+
+    .status {
+      font-size: 0.9em;
+      color: #555;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Assessment Test</h1>
+    <p>Please complete all sections of the test.</p>
+
+    <form id="testForm" method="POST">
+      {% set current_category = "" %}
+      {% for question in questions %}
+      {% set q_index = loop.index0 %}
+      {% if question.category != current_category %}
+      {% if not loop.first %}
+  </div>{% endif %}
+  <div class="question-section">
+    <h2>{{ question.category.capitalize() }} Questions</h2>
+    {% endif %}
+    {% set current_category = question.category %}
+
+    <div class="question">
+      <p>Q{{ q_index + 1 }}: {{ question.question }}</p>
+
+      {% if question.category == 'scenario' %}
+      <textarea name="q{{ q_index }}" required>{{ request.form.get('q' ~ q_index, '') }}</textarea>
+      {% else %}
+      <div class="options">
+        {% for option in question.options %}
+        <label>
+          <input type="radio" name="q{{ q_index }}" value="{{ option }}" {% if request.form.get('q' ~ q_index)==option
+            %}checked{% endif %} required>
+          {{ option }}
+        </label>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% if question.category == 'intro' %}
+      <div id="recorder-{{ q_index }}" class="recorder-controls">
+        <button type="button" class="start" onclick="startRecording('{{ q_index }}')">🎙️ Start Recording</button>
+        <button type="button" class="stop" onclick="stopRecording('{{ q_index }}')" disabled>⏹️ Stop</button>
+        <button type="button" class="submit" onclick="submitRecording('{{ q_index }}', '{{ test_id }}')" disabled>⬆️
+          Upload</button>
+        <p id="recording-status-{{ q_index }}" class="status"></p>
+        <audio id="audio-playback-{{ q_index }}" class="audio-playback" controls></audio>
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <input type="hidden" name="email" value="{{ email }}">
+  <input type="hidden" name="test_id" value="{{ test_id }}">
+  <button type="submit">Submit Test</button>
+  </form>
+  </div>
+
+  <script>
+    const form = document.getElementById("testForm");
+    const storageKey = "candidate_answers_{{ test_id|e }}";
+    let mediaRecorders = {};
+    let recordedChunks = {};
+
+    // Load saved answers
+    window.addEventListener("DOMContentLoaded", () => {
+      const saved = JSON.parse(localStorage.getItem(storageKey) || "{}");
+      for (const [name, value] of Object.entries(saved)) {
+        const radio = form.querySelector(`input[name="${name}"][value="${value}"]`);
+        if (radio) radio.checked = true;
+        const textarea = form.querySelector(`textarea[name="${name}"]`);
+        if (textarea) textarea.value = value;
+      }
+    });
+
+    // Save answers locally
+    const saveToLocal = () => {
+      const data = {};
+      const inputs = form.querySelectorAll("input[type=radio]:checked, textarea");
+      inputs.forEach(el => data[el.name] = el.value);
+      localStorage.setItem(storageKey, JSON.stringify(data));
+    };
+    form.addEventListener("change", saveToLocal);
+    form.addEventListener("input", saveToLocal);
+    form.addEventListener("submit", () => localStorage.removeItem(storageKey));
+
+    // 🎤 Audio Recording Logic
+    async function startRecording(idx) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        recordedChunks[idx] = [];
+        const recorder = new MediaRecorder(stream);
+        mediaRecorders[idx] = recorder;
+
+        recorder.ondataavailable = e => recordedChunks[idx].push(e.data);
+        recorder.start();
+
+        document.getElementById(`recording-status-${idx}`).innerText = "Recording...";
+        document.querySelector(`#recorder-${idx} .stop`).disabled = false;
+        document.querySelector(`#recorder-${idx} .start`).disabled = true;
+      } catch (err) {
+        alert("Microphone access denied or unavailable.");
+        console.error(err);
+      }
+    }
+
+    function stopRecording(idx) {
+      const recorder = mediaRecorders[idx];
+      if (!recorder) return;
+      recorder.stop();
+
+      recorder.onstop = () => {
+        const blob = new Blob(recordedChunks[idx], { type: "audio/webm" });
+        const audioURL = URL.createObjectURL(blob);
+        const audio = document.getElementById(`audio-playback-${idx}`);
+        audio.src = audioURL;
+        audio.style.display = "block";
+      };
+
+      document.getElementById(`recording-status-${idx}`).innerText = "Recording stopped.";
+      document.querySelector(`#recorder-${idx} .submit`).disabled = false;
+      document.querySelector(`#recorder-${idx} .stop`).disabled = true;
+    }
+
+    function submitRecording(idx, testId) {
+      const blob = new Blob(recordedChunks[idx] || [], { type: "audio/webm" });
+      if (blob.size === 0) {
+        alert("No recording found. Please record before submitting.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("audio", blob, `intro_${idx}.webm`);
+      formData.append("test_id", testId);
+      formData.append("email", "{{ email }}"); // ✅ include candidate email
+      formData.append("question_index", idx);
+
+      const status = document.getElementById(`recording-status-${idx}`);
+      status.innerText = "Uploading...";
+
+      // fetch("/upload_audio", { method: "POST", body: formData })
+      //   .then(res => res.json())
+      //   .then(data => {
+      //     const status = document.getElementById(`recording-status-${idx}`);
+      //     status.innerHTML = `
+      //   ✅ ${data.message}<br>
+      //   <b>Transcript:</b> ${data.transcription}<br>
+      //   <b>Score:</b> ${data.evaluation?.score}/10<br>
+      //   <b>Explanation:</b> ${data.evaluation?.explanation}
+      // `;
+      //   })
+      fetch("/upload_audio", { method: "POST", body: formData })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        status.innerHTML = "✅ Audio submitted successfully!";
+      } else {
+        status.innerHTML = "❌ Audio submission failed.";
+      }
+    })
+        .catch(err => {
+          console.error(err);
+          // document.getElementById(`recording-status-${idx}`).innerText = "Upload failed.";
+          status.innerHTML = "❌ Audio submission failed.";
+        });
+    }
+
+  </script>
+</body>
+
+</html> -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Take Your Test</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 30px;
+      background: #f8f9fa;
+      color: #333;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: #fff;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #444;
+    }
+
+    h2 {
+      color: #007bff;
+    }
+
+    .question-section {
+      margin-bottom: 40px;
+    }
+
+    .question {
+      margin-bottom: 20px;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background: #fafafa;
+    }
+
+    .question p {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .options label {
+      margin-bottom: 8px;
+      cursor: pointer;
+    }
+
+    .options input[type="radio"] {
+      margin-right: 8px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 100px;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .recorder-controls button {
+      margin-right: 5px;
+    }
+
+    .audio-playback {
+      margin-top: 10px;
+      display: none;
+    }
+
+    .status {
+      font-size: 0.9em;
+      color: #555;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Assessment Test</h1>
+    <p>Please complete all sections of the test.</p>
+
+    <form id="testForm" method="POST">
+      {% set current_category = "" %}
+      {% for question in questions %}
+      {% set q_index = loop.index0 %}
+      {% if question.category != current_category %}
+      {% if not loop.first %}
+  </div>{% endif %}
+  <div class="question-section">
+    <h2>{{ question.category.capitalize() }} Questions</h2>
+    {% endif %}
+    {% set current_category = question.category %}
+
+    <div class="question">
+      <p>Q{{ q_index + 1 }}: {{ question.question }}</p>
+
+      {% if question.category == 'scenario' %}
+      <textarea name="q{{ q_index }}" required>{{ request.form.get('q' ~ q_index, '') }}</textarea>
+      {% else %}
+      <div class="options">
+        {% for option in question.options %}
+        <label>
+          <input type="radio" name="q{{ q_index }}" value="{{ option }}" {% if request.form.get('q' ~ q_index)==option
+            %}checked{% endif %} required>
+          {{ option }}
+        </label>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% if question.category == 'intro' %}
+      <div id="recorder-{{ q_index }}" class="recorder-controls">
+        <button type="button" class="start" onclick="startRecording('{{ q_index }}')">🎙️ Start Recording</button>
+        <button type="button" class="stop" onclick="stopRecording('{{ q_index }}')" disabled>⏹️ Stop</button>
+        <button type="button" class="submit" onclick="submitRecording('{{ q_index }}', '{{ test_id }}')" disabled>⬆️
+          Upload</button>
+        <p id="recording-status-{{ q_index }}" class="status"></p>
+        <audio id="audio-playback-{{ q_index }}" class="audio-playback" controls></audio>
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <input type="hidden" name="email" value="{{ email }}">
+  <input type="hidden" name="test_id" value="{{ test_id }}">
+  <button type="submit">Submit Test</button>
+  </form>
+  </div>
+
+  <script>
+    const form = document.getElementById("testForm");
+    const storageKey = "candidate_answers_{{ test_id|e }}";
+    let mediaRecorders = {};
+    let recordedChunks = {};
+
+    // ✅ Restore saved answers from localStorage
+    window.addEventListener("DOMContentLoaded", () => {
+      const saved = JSON.parse(localStorage.getItem(storageKey) || "{}");
+      for (const [name, value] of Object.entries(saved)) {
+        const radio = form.querySelector(`input[name="${name}"][value="${value}"]`);
+        if (radio) radio.checked = true;
+        const textarea = form.querySelector(`textarea[name="${name}"]`);
+        if (textarea) textarea.value = value;
+      }
+    });
+
+    // ✅ Save answers locally in case of refresh
+    const saveToLocal = () => {
+      const data = {};
+      const inputs = form.querySelectorAll("input[type=radio]:checked, textarea");
+      inputs.forEach(el => data[el.name] = el.value);
+      localStorage.setItem(storageKey, JSON.stringify(data));
+    };
+    form.addEventListener("change", saveToLocal);
+    form.addEventListener("input", saveToLocal);
+    form.addEventListener("submit", () => localStorage.removeItem(storageKey));
+
+    // 🎤 Audio Recording Logic
+    async function startRecording(idx) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+        recordedChunks[idx] = [];
+        const options = { mimeType: "audio/webm;codecs=opus" };
+        let recorder;
+        try {
+          recorder = new MediaRecorder(stream, options);
+        } catch (_) {
+          recorder = new MediaRecorder(stream);
+        }
+
+        mediaRecorders[idx] = recorder;
+        recorder.ondataavailable = e => {
+          if (e.data && e.data.size > 0) recordedChunks[idx].push(e.data);
+        };
+        recorder.start();
+
+        document.getElementById(`recording-status-${idx}`).innerText = "Recording...";
+        document.querySelector(`#recorder-${idx} .stop`).disabled = false;
+        document.querySelector(`#recorder-${idx} .start`).disabled = true;
+      } catch (err) {
+        alert("Microphone access denied or unavailable.");
+        console.error(err);
+      }
+    }
+
+    function stopRecording(idx) {
+      const recorder = mediaRecorders[idx];
+      if (!recorder) return;
+
+      if (recorder.state !== "inactive") recorder.stop();
+
+      recorder.onstop = () => {
+        const blob = new Blob(recordedChunks[idx], { type: "audio/webm" });
+        const audioURL = URL.createObjectURL(blob);
+        const audio = document.getElementById(`audio-playback-${idx}`);
+        audio.src = audioURL;
+        audio.style.display = "block";
+      };
+
+      document.getElementById(`recording-status-${idx}`).innerText = "Recording stopped.";
+      document.querySelector(`#recorder-${idx} .submit`).disabled = false;
+      document.querySelector(`#recorder-${idx} .stop`).disabled = true;
+    }
+
+    async function submitRecording(idx, testId) {
+      const blob = new Blob(recordedChunks[idx] || [], { type: "audio/webm" });
+      if (blob.size === 0) {
+        alert("No recording found. Please record before submitting.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("audio", blob, `intro_${idx}.webm`);
+      formData.append("test_id", testId);
+      formData.append("email", "{{ email }}");
+      formData.append("question_index", idx);
+
+      const status = document.getElementById(`recording-status-${idx}`);
+      status.innerText = "Uploading...";
+
+      try {
+        const res = await fetch("/upload_audio", { method: "POST", body: formData });
+        const data = await res.json();
+
+        if (data.success) {
+          status.innerHTML = `
+            ✅ Audio uploaded successfully!<br>
+            <b>File:</b> ${data.file || "saved"}<br>
+            ${data.transcription ? `<b>Transcript:</b> ${data.transcription}` : ""}
+          `;
+        } else {
+          status.innerHTML = "❌ Audio submission failed: " + (data.message || "");
+        }
+      } catch (err) {
+        console.error(err);
+        status.innerHTML = "❌ Audio submission failed (network/server error).";
+      }
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,481 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Applicants for {{ job['job_title'] }}</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Applicants for: <strong>{{ job['job_title'] }}</strong></h2>
+        <p><a href="/dashboard">&larr; Back to Dashboard</a></p>
+        <div class="card">
+            <div class="card-body">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Applicant Name</th>
+                            <th>Match Score</th>
+                            <th>Status</th>
+                            <th width="35%">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for applicant in applicants %}
+                        <tr>
+                            <td>{{ applicant['applicant_name'] }}</td>
+                            <td><span class="badge badge-primary" style="font-size: 1rem;">{{ applicant['match_score'] }}%</span></td>
+                            <td>
+                                {% if applicant['status'] == 'Shortlisted' %}
+                                    <span class="badge badge-success">Shortlisted</span>
+                                {% else %}
+                                    <span class="badge badge-secondary">{{ applicant['status'] }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="/applicant/{{ applicant['id'] }}" class="btn btn-sm btn-info">View Details</a>
+                                
+                                {% if applicant['status'] != 'Shortlisted' %}
+                                <form action="/applicant/{{ applicant['id'] }}/update_status" method="POST" style="display:inline;">
+                                    <input type="hidden" name="status" value="Shortlisted">
+                                    <button type="submit" class="btn btn-sm btn-success">Shortlist</button>
+                                </form>
+                                {% endif %}
+
+                                <form action="/applicant/{{ applicant['id'] }}/update_status" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to discard this applicant?');">
+                                    <input type="hidden" name="status" value="Discarded">
+                                    <button type="submit" class="btn btn-sm btn-warning">Discard</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center">No new or shortlisted applications for this job.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html> -->
+
+
+
+
+
+
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Applicants for {{ job['job_title'] }}</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+</head>
+<body>
+    <div class="container mt-5"> -->
+        <!-- Header with Buttons -->
+        <!-- <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2>Applicants for: <strong>{{ job['job_title'] }}</strong></h2>
+            <div> -->
+                <!-- Generate Test & Send Link Button -->
+                <!-- <button class="btn btn-primary mr-2" id="generateTestBtn" onclick="generateTestLink()">
+                    🔗 Generate Test & Send Link
+                </button> -->
+
+                <!-- Existing Threshold Button -->
+                <!-- <button class="btn btn-success" data-toggle="modal" data-target="#thresholdModal">
+                    📈 Set Shortlist Threshold
+                </button>
+            </div>
+        </div>
+
+        <p><a href="/dashboard">&larr; Back to Dashboard</a></p>
+
+        <div class="card">
+            <div class="card-body">    
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Applicant Name</th>
+                            <th>Match Score</th>
+                            <th>Status</th>
+                            <th width="35%">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for applicant in applicants %}
+                        <tr>
+                            <td>{{ applicant['applicant_name'] }}</td>
+                            <td>
+                                <span class="badge badge-primary" style="font-size: 1rem;">
+                                    {{ applicant['match_score'] }}%
+                                </span>
+                            </td>
+                            <td>
+                                {% if applicant['status'] == 'Shortlisted' %}
+                                    <span class="badge badge-success">Shortlisted</span>
+                                {% else %}
+                                    <span class="badge badge-secondary">{{ applicant['status'] }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="/applicant/{{ applicant['id'] }}" class="btn btn-sm btn-info">View Details</a>
+
+                                {% if applicant['status'] != 'Shortlisted' %}
+                                <form action="/applicant/{{ applicant['id'] }}/update_status" method="POST" style="display:inline;">
+                                    <input type="hidden" name="status" value="Shortlisted">
+                                    <button type="submit" class="btn btn-sm btn-success">Shortlist</button>
+                                </form>
+                                {% endif %}
+
+                                <form action="/applicant/{{ applicant['id'] }}/update_status" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to discard this applicant?');">
+                                    <input type="hidden" name="status" value="Discarded">
+                                    <button type="submit" class="btn btn-sm btn-warning">Discard</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center">No new or shortlisted applications for this job.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div> -->
+
+    <!-- Threshold Modal -->
+    <!-- <div class="modal fade" id="thresholdModal" tabindex="-1" role="dialog" aria-labelledby="thresholdModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <form id="thresholdForm" class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="thresholdModalLabel">Set Shortlist Threshold</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span>&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <label for="thresholdInput">Enter threshold score (0–100):</label>
+            <input type="number" id="thresholdInput" class="form-control" min="0" max="100" required>
+            <small class="text-muted">
+                Candidates with score ≥ threshold will receive a “Shortlisted” email.
+            </small>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-success">Send Emails</button>
+          </div>
+        </form>
+      </div>
+    </div> -->
+
+    <!-- Threshold Modal Script -->
+    <!-- <script>
+    $('#thresholdForm').on('submit', async function(event) {
+        event.preventDefault();
+        const threshold = $('#thresholdInput').val();
+        const jobId = "{{ job['id'] }}";
+
+        const response = await fetch(`/shortlist_above_threshold/${jobId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ threshold: threshold })
+        });
+        const result = await response.json();
+        alert(result.message);
+        $('#thresholdModal').modal('hide');
+    });
+    </script> -->
+
+    <!-- Generate Test & Send Link Script -->
+    <!-- <script>
+    function generateTestLink() {
+        const confirmation = confirm("Do you want to generate and send test links to the applicants?");
+        if (!confirmation) return;
+
+        fetch('/generate_test_link', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert("✅ Test links generated and sent successfully!");
+                location.reload();
+            } else {
+                alert("❌ Error: " + (data.message || "Failed to send links."));
+            }
+        })
+        .catch(err => {
+            console.error("Error generating test link:", err);
+            alert("Something went wrong while generating links.");
+        });
+    }
+    </script>
+
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Applicants for {{ job['job_title'] }}</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <!-- Header with Buttons -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2>Applicants for: <strong>{{ job['job_title'] }}</strong></h2>
+            <div>
+                <!-- Generate Test & Send Link Button (opens modal) -->
+                <button class="btn btn-primary mr-2" data-toggle="modal" data-target="#generateTestModal">
+                    🔗 Generate Test & Send Link
+                </button>
+
+                <!-- Existing Threshold Button -->
+                <button class="btn btn-success" data-toggle="modal" data-target="#thresholdModal">
+                    📈 Set Shortlist Threshold
+                </button>
+            </div>
+        </div>
+
+        <p><a href="/dashboard">&larr; Back to Dashboard</a></p>
+
+        <div class="card">
+            <div class="card-body">    
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Applicant Name</th>
+                            <th>Match Score</th>
+                            <th>Status</th>
+                            <th width="35%">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for applicant in applicants %}
+                        <tr>
+                            <td>{{ applicant['applicant_name'] }}</td>
+                            <td>
+                                <span class="badge badge-primary" style="font-size: 1rem;">
+                                    {{ applicant['match_score'] }}%
+                                </span>
+                            </td>
+                            <td>
+                                {% if applicant['status'] == 'Shortlisted' %}
+                                    <span class="badge badge-success">Shortlisted</span>
+                                {% else %}
+                                    <span class="badge badge-secondary">{{ applicant['status'] }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="/applicant/{{ applicant['id'] }}" class="btn btn-sm btn-info">View Details</a>
+
+                                {% if applicant['status'] != 'Shortlisted' %}
+                                <form action="/applicant/{{ applicant['id'] }}/update_status" method="POST" style="display:inline;">
+                                    <input type="hidden" name="status" value="Shortlisted">
+                                    <button type="submit" class="btn btn-sm btn-success">Shortlist</button>
+                                </form>
+                                {% endif %}
+
+                                <form action="/applicant/{{ applicant['id'] }}/update_status" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to discard this applicant?');">
+                                    <input type="hidden" name="status" value="Discarded">
+                                    <button type="submit" class="btn btn-sm btn-warning">Discard</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center">No new or shortlisted applications for this job.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Threshold Modal -->
+    <div class="modal fade" id="thresholdModal" tabindex="-1" role="dialog" aria-labelledby="thresholdModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <form id="thresholdForm" class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="thresholdModalLabel">Set Shortlist Threshold</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span>&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <label for="thresholdInput">Enter threshold score (0–100):</label>
+            <input type="number" id="thresholdInput" class="form-control" min="0" max="100" required>
+            <small class="text-muted">
+                Candidates with score ≥ threshold will receive a “Shortlisted” email.
+            </small>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-success">Send Emails</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Generate Candidate Test Modal -->
+    <div class="modal fade" id="generateTestModal" tabindex="-1" role="dialog" aria-labelledby="generateTestModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <form id="generateTestForm" class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="generateTestModalLabel">🧠 Generate Candidate Test</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span>&times;</span>
+            </button>
+          </div>
+
+          <div class="modal-body">
+            <div class="form-group">
+              <label>Logical Reasoning:</label>
+              <input type="number" class="form-control" name="logical" value="2" min="0" required>
+            </div>
+            <div class="form-group">
+              <label>Cognitive Ability:</label>
+              <input type="number" class="form-control" name="cognitive" value="2" min="0" required>
+            </div>
+            <div class="form-group">
+              <label>Scenario-Based:</label>
+              <input type="number" class="form-control" name="scenario" value="2" min="0" required>
+            </div>
+            <div class="form-group">
+              <label>Technical Questions:</label>
+              <input type="number" class="form-control" name="technical" value="3" min="0" required>
+            </div>
+            <div class="form-group">
+              <label>Technical Topics:</label>
+              <input type="text" class="form-control" name="topics" placeholder="e.g., Python, Flask, SQL">
+              <small class="text-muted">Comma-separated topics to guide Gemini.</small>
+            </div>
+            <div class="form-group">
+              <label>Total Test Duration (minutes):</label>
+              <input type="number" class="form-control" name="duration" value="30" min="5" required>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Generate &amp; Send</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Threshold Modal Script -->
+    <script>
+      $('#thresholdForm').on('submit', async function(event) {
+          event.preventDefault();
+          const threshold = $('#thresholdInput').val();
+          const jobId = "{{ job['id'] }}";
+
+          const response = await fetch(`/shortlist_above_threshold/${jobId}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ threshold: threshold })
+          });
+          const result = await response.json();
+          alert(result.message);
+          $('#thresholdModal').modal('hide');
+          if (result.success) location.reload();
+      });
+    </script>
+
+    <!-- Generate Test Modal Script -->
+    <script>
+      $('#generateTestForm').on('submit', async function(e) {
+        e.preventDefault();
+
+        const payload = {
+          job_id: "{{ job['id'] }}",
+          logical: parseInt(this.logical.value || 0, 10),
+          cognitive: parseInt(this.cognitive.value || 0, 10),
+          scenario: parseInt(this.scenario.value || 0, 10),
+          technical: parseInt(this.technical.value || 0, 10),
+          topics: (this.topics.value || '').trim(),
+          duration: parseInt(this.duration.value || 30, 10)
+        };
+
+        // Basic client-side validation
+        if (payload.duration < 5) {
+          alert('Duration must be at least 5 minutes.'); return;
+        }
+
+        try {
+          const resp = await fetch('/generate_link', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const data = await resp.json();
+          if (data.success) {
+            alert(`✅ Test generated (ID: ${data.test_id}). Links sent to ${data.sent_count} shortlisted candidate(s).`);
+            $('#generateTestModal').modal('hide');
+          } else {
+            alert('❌ ' + (data.message || 'Failed to generate test.'));
+          }
+        } catch (err) {
+          console.error(err);
+          alert('Something went wrong while generating/sending links.');
+        }
+      });
+    </script>
+
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

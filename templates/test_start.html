@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Candidate Introduction</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f5f7fa;
+      padding: 30px;
+    }
+    video {
+      width: 60%;
+      max-width: 500px;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      margin: 10px 0;
+    }
+    button {
+      margin: 6px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      background-color: #007bff;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+    #question-box {
+      font-size: 18px;
+      margin: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h2>🎥 Candidate Introduction</h2>
+  <p>Please answer the following two introduction questions by recording your responses.</p>
+
+  <div id="question-box">Loading questions...</div>
+
+  <video id="preview" autoplay muted></video>
+  <video id="playback" controls style="display:none;"></video>
+
+  <div>
+    <button id="startBtn" disabled>Start Recording</button>
+    <button id="stopBtn" disabled>Stop Recording</button>
+    <button id="nextBtn" disabled>Next Question</button>
+  </div>
+
+  <script>
+    let stream, mediaRecorder, recordedChunks = [];
+    let questions = [];
+    let currentIndex = 0;
+    const preview = document.getElementById("preview");
+    const playback = document.getElementById("playback");
+    const questionBox = document.getElementById("question-box");
+    const startBtn = document.getElementById("startBtn");
+    const stopBtn = document.getElementById("stopBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const candidateId = Math.random().toString(36).substring(7);
+
+    async function initCamera() {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        preview.srcObject = stream;
+        startBtn.disabled = false;
+        await loadQuestions();
+      } catch (err) {
+        alert("⚠️ Please allow camera and microphone permissions to continue.");
+        console.error(err);
+      }
+    }
+
+    async function loadQuestions() {
+      const res = await fetch("/generate_intro_questions");
+      questions = await res.json();
+      showQuestion();
+    }
+
+    function showQuestion() {
+      questionBox.textContent = questions[currentIndex].question;
+      playback.style.display = "none";
+      preview.style.display = "block";
+      nextBtn.disabled = true;
+    }
+
+    startBtn.onclick = () => {
+      recordedChunks = [];
+      mediaRecorder = new MediaRecorder(stream, { mimeType: "video/webm" });
+
+      mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
+      mediaRecorder.onstop = uploadVideo;
+
+      mediaRecorder.start();
+      startBtn.disabled = true;
+      stopBtn.disabled = false;
+    };
+
+    stopBtn.onclick = () => {
+      mediaRecorder.stop();
+      stopBtn.disabled = true;
+    };
+
+    async function uploadVideo() {
+      const blob = new Blob(recordedChunks, { type: "video/webm" });
+      const formData = new FormData();
+      formData.append("video", blob, `intro_q${currentIndex + 1}.webm`);
+      formData.append("question_id", currentIndex + 1);
+      formData.append("candidate_id", candidateId);
+
+      const res = await fetch("/submit_intro_video", { method: "POST", body: formData });
+      const data = await res.json();
+      console.log(data);
+
+      const videoURL = URL.createObjectURL(blob);
+      playback.src = videoURL;
+      playback.style.display = "block";
+      preview.style.display = "none";
+      nextBtn.disabled = false;
+    }
+
+    nextBtn.onclick = () => {
+      if (currentIndex + 1 < questions.length) {
+        currentIndex++;
+        showQuestion();
+        startBtn.disabled = false;
+      } else {
+        alert("✅ Introduction complete! Proceeding to the main test...");
+        window.location.href = "/generate_link"; // go to actual test
+      }
+    };
+
+    initCamera();
+  </script>
+</body>
+</html>

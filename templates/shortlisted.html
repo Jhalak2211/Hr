@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>All Shortlisted Candidates</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>All Shortlisted Candidates</h2>
+        <p><a href="/dashboard">&larr; Back to Dashboard</a></p>
+        <div class="card">
+            <div class="card-body">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Applicant Name</th>
+                            <th>Applied for Job</th>
+                            <th>Match Score</th>
+                            <th>Email</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for candidate in candidates %}
+                        <tr>
+                            <td>{{ candidate['applicant_name'] }}</td>
+                            <td>{{ candidate['job_title'] }}</td>
+                            <td><span class="badge badge-primary" style="font-size: 1rem;">{{ candidate['match_score'] }}%</span></td>
+                            <td>{{ candidate['applicant_email'] }}</td>
+                            <td>
+                                <a href="/applicant/{{ candidate['id'] }}" class="btn btn-sm btn-info">View Details</a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center">No candidates have been shortlisted yet.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
